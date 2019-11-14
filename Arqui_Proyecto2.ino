@@ -5,6 +5,20 @@
 #define pinServoArriba 6
 #define pinServoAbajo 5
 
+//-Set Angle for servos
+//-Servo Arriba
+#define servoFinal 43
+#define servoInit 140
+#define servoMidRGB 97
+
+//-Servo abajo
+#define servoRojo 100
+#define servoVerde 75
+#define servoAzul 50
+
+unsigned long R, G, B, max;
+double fr, fg, fb;
+
 //Defining variables for RGB sensor
 #define SEL_RED            \
     digitalWrite(S2, LOW); \
@@ -32,7 +46,15 @@ int S3 = 13;     //color azul
 int OE = 8;      //color blanco
 int RGB_OUT = 9; //color cafe
 
+//Defining variables for ESPWIFI
+int PIN1_ESP = 4;
+int PIN2_ESP = 3;
+int VAL_ESP = 2;
+
 Servo servoArriba, servoAbajo;
+
+
+
 
 void setup()
 {
@@ -40,7 +62,15 @@ void setup()
     //Set up for Servo Motors
     servoArriba.attach(pinServoArriba);
     servoAbajo.attach(pinServoAbajo);
-
+    
+    //Set up for WIFI-ESP
+    pinMode(PIN1_ESP, OUTPUT);
+    pinMode(PIN2_ESP, OUTPUT);
+    pinMode(VAL_ESP, OUTPUT);
+    digitalWrite(PIN1_ESP, LOW);    
+    digitalWrite(PIN2_ESP, LOW);
+    digitalWrite(VAL_ESP, LOW);
+    
     //Set up for RGB
     pinMode(S0, OUTPUT);
     pinMode(S1, OUTPUT);
@@ -57,19 +87,6 @@ void setup()
     Serial.begin(9600);
 }
 
-//-Set Angle for servos
-//-Servo Arriba
-#define servoFinal 43
-#define servoInit 140
-#define servoMidRGB 97
-
-//-Servo abajo
-#define servoRojo 100
-#define servoVerde 75
-#define servoAzul 50
-
-unsigned long R, G, B, max;
-double fr, fg, fb;
 
 void loop()
 {
@@ -120,16 +137,21 @@ void loop()
 
     if (fr > fg & fr > fb)
     {
-        Serial.print("Rojo");
-        Serial.println();
+        Serial.print("Rojo"), Serial.println();
         servoAbajo.write(servoRojo);
-    }
+        digitalWrite(PIN1_ESP, LOW), digitalWrite(PIN2_ESP, HIGH), digitalWrite(VAL_ESP, HIGH);
+        delay(1000);
+        digitalWrite(VAL_ESP, LOW);
+        }
 
     if (fg > fr & fg > fb)
     {
         Serial.print("Verde");
         Serial.println();
         servoAbajo.write(servoVerde);
+        digitalWrite(PIN1_ESP, HIGH), digitalWrite(PIN2_ESP, LOW), digitalWrite(VAL_ESP, HIGH);
+        delay(1000);
+        digitalWrite(VAL_ESP, LOW);
     }
 
     if (fb > fr & fb > fg)
@@ -137,6 +159,9 @@ void loop()
         Serial.print("Azul");
         Serial.println();
         servoAbajo.write(servoAzul);
+        digitalWrite(PIN1_ESP, LOW), digitalWrite(PIN2_ESP, LOW), digitalWrite(VAL_ESP, HIGH);
+        delay(1000);
+        digitalWrite(VAL_ESP, LOW);
     }
 
     //Serial.print("r: "); Serial.print(map(fr, 25000, 250000, 0, 255)); Serial.println();
