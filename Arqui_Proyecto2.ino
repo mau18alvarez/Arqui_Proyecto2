@@ -99,16 +99,7 @@ void loop()
         lec_infr = true;
         //Aqui se pone lo que quiere que haga
         Serial.println("obstaculo");
-    }
-    else if (VALOR && lec_infr)
-    {
-        lec_infr = false;
-        //Aqui se pone lo que quiere que haga
-        Serial.println("libre");
-    }
-    delay(100);
-
-    //Setear posicion inicial
+        //Setear posicion inicial
     servoArriba.write(servoInit);
     delay(1000);
 
@@ -170,7 +161,21 @@ void loop()
     //RGB SENSOR--------------------------------------------------------------------------------------------------------------------
 
     servoArriba.write(servoFinal);
+    lec_infr = false;
     delay(1000);
+    }
+    else if (VALOR && lec_infr)
+    {
+        lec_infr = false;
+        //Aqui se pone lo que quiere que haga
+        Serial.println("libre");
+        digitalWrite(PIN1_ESP, HIGH), digitalWrite(PIN2_ESP, HIGH), digitalWrite(VAL_ESP, HIGH);
+        delay(1000);
+        digitalWrite(VAL_ESP, LOW);
+    }
+    delay(100);
+
+    
 }
 
 ////////////////////////////////////////////////////////////////
