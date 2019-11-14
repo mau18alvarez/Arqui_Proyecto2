@@ -1,120 +1,159 @@
 #include <Servo.h>
+#include <infrarrojo.h>
 
 //Defining variables for servo motors
 #define pinServoArriba 3
 #define pinServoAbajo 4
 
 //Defining variables for RGB sensor
-#define SEL_RED  \
-   digitalWrite(S2,LOW);digitalWrite(S3,LOW)
-#define SEL_GREEN \
-   digitalWrite(S2,HIGH);digitalWrite(S3,HIGH)
-#define SEL_BLUE \
-   digitalWrite(S2,LOW);digitalWrite(S3,HIGH)
-#define SEL_CLEAR \
-   digitalWrite(S2,HIGH);digitalWrite(S3,LOW)
+#define SEL_RED            \
+    digitalWrite(S2, LOW); \
+    digitalWrite(S3, LOW);
+#define SEL_GREEN           \
+    digitalWrite(S2, HIGH); \
+    digitalWrite(S3, HIGH);
+#define SEL_BLUE           \
+    digitalWrite(S2, LOW); \
+    digitalWrite(S3, HIGH);
+#define SEL_CLEAR           \
+    digitalWrite(S2, HIGH); \
+    digitalWrite(S3, LOW);
+
+//Variables infrarrojo
+infrarrojo estado(5);
+int VALOR; // Variable que recibe el dato
+bool lec_infr = false;
 
 //Defining pin-out for RGB sensor
-int S0=10;    //color gris 
-int S1=11;    //color morado
-int S2=12;    //color naranja
-int S3=13;    //color azul
-int OE=8;   //color blanco
+int S0 = 10;     //color gris
+int S1 = 11;     //color morado
+int S2 = 12;     //color naranja
+int S3 = 13;     //color azul
+int OE = 8;      //color blanco
 int RGB_OUT = 9; //color cafe
 
 Servo servoArriba, servoAbajo;
 
-void setup() {
+void setup()
+{
 
-  //Set up for Servo Motors
-  servoArriba.attach(pinServoArriba);
-  servoAbajo.attach(pinServoAbajo);
+    //Set up for Servo Motors
+    servoArriba.attach(pinServoArriba);
+    servoAbajo.attach(pinServoAbajo);
 
-  //Set up for RGB
-  pinMode(S0,OUTPUT); pinMode(S1,OUTPUT);  pinMode(S2,OUTPUT); pinMode(S3,OUTPUT), pinMode(OE,OUTPUT);
-  pinMode(RGB_OUT,INPUT);
-  digitalWrite(S0,HIGH); digitalWrite(S1,HIGH);
-  digitalWrite(S2,LOW); digitalWrite(S3,LOW);
-  digitalWrite(OE,LOW); //always on
-  
-  Serial.begin(9600);
+    //Set up for RGB
+    pinMode(S0, OUTPUT);
+    pinMode(S1, OUTPUT);
+    pinMode(S2, OUTPUT);
+    pinMode(S3, OUTPUT);
+    pinMode(OE, OUTPUT);
+    pinMode(RGB_OUT, INPUT);
+    digitalWrite(S0, HIGH);
+    digitalWrite(S1, HIGH);
+    digitalWrite(S2, LOW);
+    digitalWrite(S3, LOW);
+    digitalWrite(OE, LOW); //always on
 
+    Serial.begin(9600);
 }
 
 //-Set Angle for servos
 //-Servo Arriba
-#define  servoFinal 43
-#define  servoInit 140
-#define  servoMidRGB 97
+#define servoFinal 43
+#define servoInit 140
+#define servoMidRGB 97
 
-//-Servo Arriba
-#define  servoRojo 100
-#define  servoVerde 75
-#define  servoAzul 50
+//-Servo abajo
+#define servoRojo 100
+#define servoVerde 75
+#define servoAzul 50
 
-unsigned long R,G,B,max;
-double fr,fg,fb;
+unsigned long R, G, B, max;
+double fr, fg, fb;
 
-void loop() {
+void loop()
+{
 
-  //Setear posicion inicial
-  servoArriba.write(servoInit);
-  delay(1000);
+    //Manejo de infrarrojo
+    VALOR = estado.lectura(VALOR);
 
-  servoArriba.write(servoMidRGB);
-  delay(2000);
+    if (!VALOR && !lec_infr)
+    {
+        lec_infr = true;
+        //Aqui se pone lo que quiere que haga
+        Serial.println("obstaculo");
+    }
+    else if (VALOR && lec_infr)
+    {
+        lec_infr = false;
+        //Aqui se pone lo que quiere que haga
+        Serial.println("libre");
+    }
+    delay(100);
 
-  //RGB SENSOR--------------------------------------------------------------------------------------------------------------------
+    //Setear posicion inicial
+    servoArriba.write(servoInit);
+    delay(1000);
 
-   SEL_RED;
-   R=get_RGB_reading();
-   SEL_GREEN;
-   G=get_RGB_reading();
-   SEL_BLUE;
-   B=get_RGB_reading();
-   
-   fr=1.0/(R*1e-6);
-   fg=1.0/(G*1e-6);
-   fb=1.0/(B*1e-6);
-   
-   max= max(fr,max(fg,fb));
-   //Serial.print("max ");Serial.println(max);
-   
+    servoArriba.write(servoMidRGB);
+    delay(2000);
+
+    //RGB SENSOR--------------------------------------------------------------------------------------------------------------------
+
+    SEL_RED;
+    R = get_RGB_reading();
+    SEL_GREEN;
+    G = get_RGB_reading();
+    SEL_BLUE;
+    B = get_RGB_reading();
+
+    fr = 1.0 / (R * 1e-6);
+    fg = 1.0 / (G * 1e-6);
+    fb = 1.0 / (B * 1e-6);
+
+    max = max(fr, max(fg, fb));
+    //Serial.print("max ");Serial.println(max);
+
     /* Serial.print("r: "); Serial.print(fr); Serial.println();
     Serial.print("g: "); Serial.print(fg); Serial.println();
     Serial.print("b: "); Serial.print(fb); Serial.println();*/
 
-    if ( fr > fg & fr > fb) {
-    Serial.print("Rojo"); Serial.println();
-    servoAbajo.write(servoRojo);
-    }
-    
-    if ( fg > fr & fg > fb) {
-    Serial.print("Verde"); Serial.println();
-    servoAbajo.write(servoVerde);
+    if (fr > fg & fr > fb)
+    {
+        Serial.print("Rojo");
+        Serial.println();
+        servoAbajo.write(servoRojo);
     }
 
-    
-    if ( fb > fr & fb > fg) {
-    Serial.print("Azul"); Serial.println();
-    servoAbajo.write(servoAzul);
-    } 
-        
+    if (fg > fr & fg > fb)
+    {
+        Serial.print("Verde");
+        Serial.println();
+        servoAbajo.write(servoVerde);
+    }
+
+    if (fb > fr & fb > fg)
+    {
+        Serial.print("Azul");
+        Serial.println();
+        servoAbajo.write(servoAzul);
+    }
+
     //Serial.print("r: "); Serial.print(map(fr, 25000, 250000, 0, 255)); Serial.println();
     //Serial.print("g: "); Serial.print(map(fg, 25000, 250000, 0, 255)); Serial.println();
     //Serial.print("b: "); Serial.print(map(fb, 33333, 333333, 0, 255)); Serial.println();
-  //RGB SENSOR--------------------------------------------------------------------------------------------------------------------
-  
-  servoArriba.write(servoFinal);
-  delay(1000);
+    //RGB SENSOR--------------------------------------------------------------------------------------------------------------------
+
+    servoArriba.write(servoFinal);
+    delay(1000);
 }
 
-
 ////////////////////////////////////////////////////////////////
-unsigned long get_RGB_reading() {
-  unsigned long val;
-  noInterrupts();
-  val = pulseIn(RGB_OUT,HIGH); 
-  interrupts();
-  return val;
+unsigned long get_RGB_reading()
+{
+    unsigned long val;
+    noInterrupts();
+    val = pulseIn(RGB_OUT, HIGH);
+    interrupts();
+    return val;
 }
