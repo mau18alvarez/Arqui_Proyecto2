@@ -2,8 +2,8 @@
 #include <infrarrojo.h>
 
 //Defining variables for servo motors
-#define pinServoArriba 3
-#define pinServoAbajo 4
+#define pinServoArriba 6
+#define pinServoAbajo 5
 
 //Defining variables for RGB sensor
 #define SEL_RED            \
@@ -20,7 +20,7 @@
     digitalWrite(S3, LOW);
 
 //Variables infrarrojo
-infrarrojo estado(5);
+infrarrojo estado(7);
 int VALOR; // Variable que recibe el dato
 bool lec_infr = false;
 
